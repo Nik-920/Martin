@@ -2,9 +2,8 @@ import base64
 import importlib
 import io
 import sys
-import openpyxl
 import pandas as pd
-from flask import Flask, render_template_string, request
+from flask import Flask, render_template, request
 
 # Añadir ruta de los módulos de análisis
 BASE_DIR = r"/"
@@ -13,276 +12,17 @@ if BASE_DIR not in sys.path:
 
 EXCEL_PATH = r"C:\db\Nik Denilson\Universidad\IntiligenciaArtificial\Proyecto\Scrip\Martin\PROVINCIAS.xlsx"
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='static')
 # Lista de provincias y mapeo a nombres de módulos
 PROVINCIAS = [
     'BELLAVISTA', 'HUALLAGA', 'LAMAS', 'MARISCAL','MOYOBAMBA', 'PICOTA', 'RIOJA', 'SAN_MARTIN', 'TOCACHE'
 ]
 
-TEMPLATE = """
-<!doctype html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Análisis DBSCAN - San Martín</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-  <!-- Partículas de fondo -->
-  <div class="particles" id="particles"></div>
-  
-  <div class="container">
-    <header>
-      <div class="header-content">
-        <h1 class="header-title">Sistema de Análisis DBSCAN - IA</h1>
-        <p class="header-subtitle">Análisis de Densidades Horarias de Infracciones - Región San Martín</p>
-      </div>
-    </header>
-    
-    <div class="nav-section">
-      <h2 class="nav-title">
-        <i class="fas fa-map-marker-alt"></i>
-        Seleccionar Provincia para Análisis
-      </h2>
-      <div class="nav-grid">
-        {% for prov in provincias %}
-          <form style="display:inline;" method="get" action="/provincia">
-            <input type="hidden" name="prov" value="{{ prov }}">
-            <button type="submit" class="nav-button">
-              <i class="fas fa-chart-bar"></i>
-              {{ prov.replace('_',' ') }}
-            </button>
-          </form>
-        {% endfor %}
-      </div>
-    </div>
-    
-    <main>
-      {% if image %}
-        <div class="analysis-container">
-          <div class="analysis-card">
-            <div class="card-header">
-              <i class="fas fa-chart-line card-icon"></i>
-              <h2 class="card-title">Análisis de Clusters</h2>
-            </div>
-            <div class="chart-container">
-              <img src="data:image/png;base64,{{ image }}" alt="Gráfico DBSCAN de {{ selected }}">
-            </div>
-            <div class="stats-grid">
-              <div class="stat-card">
-                <div class="stat-number">{{ selected.replace('_',' ') }}</div>
-                <div class="stat-label">Provincia Analizada</div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="analysis-card">
-            <div class="card-header">
-              <i class="fas fa-table card-icon"></i>
-              <h2 class="card-title">Datos de Infracciones</h2>
-            </div>
-            <div class="table-container">
-              {{ tabla | safe }}
-            </div>
-          </div>
-        </div>
-      {% else %}
-        <div class="welcome-section">
-          <i class="fas fa-rocket welcome-icon"></i>
-          <h2 class="welcome-title">Sistema de Análisis Avanzado</h2>
-          <p class="welcome-text">
-            Bienvenido al sistema de análisis de infracciones utilizando algoritmos de clustering DBSCAN. 
-            Seleccione una provincia para visualizar los patrones de densidad horaria y análisis estadístico detallado.
-          </p>
-          
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-number">{{ provincias|length }}</div>
-              <div class="stat-label">Provincias Disponibles</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-number">DBSCAN</div>
-              <div class="stat-label">Algoritmo de Clustering</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-number">24h</div>
-              <div class="stat-label">Análisis Horario</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-number">Real-time</div>
-              <div class="stat-label">Generación de Datos</div>
-            </div>
-          </div>
-        </div>
-      {% endif %}
-    </main>
-    
-    <footer>
-      <div class="footer-content">
-        <h3 class="footer-title">
-          <i class="fas fa-university"></i>
-          Sistema de Análisis de Infracciones
-        </h3>
-        <p class="footer-text">
-          Desarrollado para el análisis de patrones de infracciones mediante clustering DBSCAN.
-          Ingeniería de Sistemas - Universidad Nacional de Cañete
-        </p>
-      </div>
-    </footer>
-  </div>
-  
-  <div class="loading" id="loading">
-    <div class="spinner"></div>
-    <p>Procesando análisis DBSCAN...</p>
-  </div>
-  
-  <script>
-    // Crear partículas de fondo
-    function createParticles() {
-      const particlesContainer = document.getElementById('particles');
-      const particleCount = 30;
-      
-      for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        
-        const size = Math.random() * 5 + 2;
-        particle.style.width = `${size}px`;
-        particle.style.height = `${size}px`;
-        particle.style.left = `${Math.random() * 100}%`;
-        particle.style.top = `${Math.random() * 100}%`;
-        particle.style.animationDelay = `${Math.random() * 6}s`;
-        particle.style.animationDuration = `${Math.random() * 4 + 4}s`;
-        
-        particlesContainer.appendChild(particle);
-      }
-    }
-    
-    // Mostrar loading al enviar formulario
-    document.querySelectorAll('form').forEach(form => {
-      form.addEventListener('submit', function() {
-        document.getElementById('loading').classList.add('active');
-      });
-    });
-    
-    // Animaciones de entrada
-    document.addEventListener('DOMContentLoaded', function() {
-      createParticles();
-      
-      const cards = document.querySelectorAll('.analysis-card, .stat-card, .nav-button');
-      cards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(30px)';
-        setTimeout(() => {
-          card.style.transition = 'opacity 0.8s cubic-bezier(0.23, 1, 0.320, 1), transform 0.8s cubic-bezier(0.23, 1, 0.320, 1)';
-          card.style.opacity = '1';
-          card.style.transform = 'translateY(0)';
-        }, index * 50);
-      });
-      
-      // Efecto parallax en el header
-      window.addEventListener('scroll', function() {
-        const scrolled = window.pageYOffset;
-        const header = document.querySelector('header');
-        if (header) {
-          header.style.transform = `translateY(${scrolled * 0.5}px)`;
-        }
-      });
-      
-      // Contador animado para stats
-      const animateCounter = (element) => {
-        const target = parseInt(element.textContent);
-        if (isNaN(target)) return;
-        
-        const duration = 2000;
-        const start = 0;
-        const increment = target / (duration / 16);
-        let current = start;
-        
-        const timer = setInterval(() => {
-          current += increment;
-          if (current >= target) {
-            element.textContent = target;
-            clearInterval(timer);
-          } else {
-            element.textContent = Math.floor(current);
-          }
-        }, 16);
-      };
-      
-      // Observer para animar contadores cuando son visibles
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const number = entry.target.querySelector('.stat-number');
-            if (number && !number.classList.contains('animated')) {
-              number.classList.add('animated');
-              animateCounter(number);
-            }
-          }
-        });
-      }, { threshold: 0.5 });
-      
-      document.querySelectorAll('.stat-card').forEach(card => {
-        observer.observe(card);
-      });
-      
-      // Efecto hover en tabla
-      const tableRows = document.querySelectorAll('.tabla-provincia tr');
-      tableRows.forEach(row => {
-        row.addEventListener('mouseenter', function() {
-          this.style.transition = 'all 0.3s ease';
-        });
-      });
-    });
-    
-    // Efecto de ripple en botones
-    document.querySelectorAll('.nav-button').forEach(button => {
-      button.addEventListener('click', function(e) {
-        const ripple = document.createElement('span');
-        const rect = this.getBoundingClientRect();
-        const size = Math.max(rect.width, rect.height);
-        const x = e.clientX - rect.left - size / 2;
-        const y = e.clientY - rect.top - size / 2;
-        
-        ripple.style.width = ripple.style.height = size + 'px';
-        ripple.style.left = x + 'px';
-        ripple.style.top = y + 'px';
-        ripple.style.position = 'absolute';
-        ripple.style.borderRadius = '50%';
-        ripple.style.background = 'rgba(255,255,255,0.6)';
-        ripple.style.transform = 'scale(0)';
-        ripple.style.animation = 'ripple 0.6s ease-out';
-        ripple.style.pointerEvents = 'none';
-        
-        this.appendChild(ripple);
-        
-        setTimeout(() => ripple.remove(), 600);
-      });
-    });
-    
-    // Agregar animación ripple
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes ripple {
-        to {
-          transform: scale(2);
-          opacity: 0;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-  </script>
-</body>
-</html>
-"""
-
+TEMPLATE = "index.html"
 
 @app.route('/')
 def index():
-    return render_template_string(TEMPLATE, provincias=PROVINCIAS, image=None, selected=None)
+    return render_template(TEMPLATE, provincias=PROVINCIAS, image=None, selected=None)
 
 
 @app.route('/provincia')
@@ -314,7 +54,7 @@ def show_provincia():
     except Exception as e:
         tabla_html = f"<p><strong>Error al leer la tabla:</strong> {e}</p>"
 
-    return render_template_string(
+    return render_template(
         TEMPLATE,
         provincias=PROVINCIAS,
         image=img_b64,
