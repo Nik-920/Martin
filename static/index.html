@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
+
 <body>
     <div class="particles"></div>
 
@@ -19,7 +21,7 @@
                     {% for provincia in provincias %}
                     <form method="POST" action="/">
                         <input type="hidden" name="provincia" value="{{ provincia }}">
-                        <button type="submit" class="nav-button">
+                        <button type="submit" class="nav-button {% if selected == provincia %}active{% endif %}">
                             <i class="fas fa-map-marker-alt"></i>
                             {{ provincia.replace('_', ' ').title() }}
                         </button>
@@ -33,7 +35,7 @@
                 <h2 class="nav-title">Dashboard</h2>
                 <form method="POST" action="/">
                     <input type="hidden" name="powerbi" value="true">
-                    <button type="submit" class="powerbi-button">
+                    <button type="submit" class="powerbi-button {% if powerbi %}active{% endif %}">
                         <i class="fas fa-chart-pie"></i>
                         Power BI Dashboard
                     </button>
@@ -68,21 +70,19 @@
 
                         <!-- Contenedor del Dashboard -->
                         <div class="powerbi-container">
-                            <iframe
-                                title="Power BI Dashboard"
+                            <iframe title="Power BI Dashboard"
                                 src="https://app.powerbi.com/view?r=eyJrIjoiOWM3NTEyZjgtYmM2NC00ZjA0LWJhOGEtMmFhNzk4YTM1YTFhIiwidCI6IjNkYzUzMjI0LTdlNjEtNDk2Ny04ZmE0LTQ5ZmNkY2IxNTliYiIsImMiOjR9&embedImagePlaceholder=true"
-                                frameborder="0"
-                                allowFullScreen="true">
+                                frameborder="0" allowFullScreen="true">
                             </iframe>
                         </div>
                     </section>
                     {% elif selected %}
-                    <!-- Sección de Análisis -->
+                    <!-- 1) Sección de Análisis DBSCAN -->
                     <section class="analysis-section">
                         <div class="province-header">
                             <h2 class="section-title">
-                                <i class="fas fa-chart-line"></i>
-                                Análisis de Clusters
+                                <i class="fas fa-chart-scatter"></i>
+                                Análisis de Clusters (DBSCAN)
                             </h2>
                             <div class="province-badge">
                                 <i class="fas fa-location-dot"></i>
@@ -110,7 +110,7 @@
                             </div>
                         </div>
 
-                        <!-- Contenedor de análisis -->
+                        <!-- Contenedor de análisis DBSCAN -->
                         <div class="analysis-container">
                             <div class="analysis-card">
                                 <div class="card-header">
@@ -119,8 +119,7 @@
                                 </div>
                                 <div class="chart-container">
                                     {% if image %}
-                                    <img src="data:image/png;base64,{{ image }}"
-                                         alt="Clusters {{ selected }}">
+                                    <img src="data:image/png;base64,{{ image }}" alt="Clusters {{ selected }}">
                                     {% else %}
                                     <p>No se pudo generar el gráfico</p>
                                     {% endif %}
@@ -134,9 +133,116 @@
                                 </div>
                                 <div class="table-container">
                                     {% if tabla %}
-                                        {{ tabla | safe }}
+                                    {{ tabla | safe }}
                                     {% else %}
-                                        <p>No hay datos disponibles</p>
+                                    <p>No hay datos disponibles</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 2) Sección de Regresión ML (General 24h) -->
+                    <section class="analysis-section">
+                        <div class="province-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-chart-area"></i>
+                                Regresión Machine Learning (Análisis General 24h)
+                            </h2>
+                            <div class="province-badge">
+                                <i class="fas fa-globe"></i>
+                                Modelo Global vs Provincia
+                            </div>
+                        </div>
+
+                        <!-- Estadísticas ML General -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <span class="stat-number">Global AI</span>
+                                <span class="stat-label">Entrenamiento Multi-Provincia</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">24h</span>
+                                <span class="stat-label">Curva de Tendencia Global</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">Log-Norm</span>
+                                <span class="stat-label">Normalización Logarítmica</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">General</span>
+                                <span class="stat-label">Comportamiento Agregado</span>
+                            </div>
+                        </div>
+
+                        <!-- Contenedor de análisis ML General -->
+                        <div class="analysis-container">
+                            <div class="analysis-card" style="grid-column: 1 / -1;">
+                                <div class="card-header">
+                                    <i class="fas fa-chart-area card-icon"></i>
+                                    <h3 class="card-title">Comparativa: Datos Reales vs Predicción del Modelo Global (24
+                                        Horas)</h3>
+                                </div>
+                                <div class="chart-container" style="background: rgba(0,0,0,0.3); padding: 2rem;">
+                                    {% if image_regresion_general %}
+                                    <img src="data:image/png;base64,{{ image_regresion_general }}"
+                                        alt="Regresión General {{ selected }}"
+                                        style="max-height: 600px; width: auto; margin: 0 auto; display: block;">
+                                    {% else %}
+                                    <p>No se pudo generar el gráfico de regresión general</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 3) Sección de Regresión ML -->
+                    <section class="analysis-section">
+                        <div class="province-header">
+                            <h2 class="section-title">
+                                <i class="fas fa-chart-line"></i>
+                                Regresión Machine Learning (Análisis Semanal)
+                            </h2>
+                            <div class="province-badge">
+                                <i class="fas fa-robot"></i>
+                                Random Forest Regressor
+                            </div>
+                        </div>
+
+                        <!-- Estadísticas ML -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <span class="stat-number">Random Forest</span>
+                                <span class="stat-label">Modelo de Regresión</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">7 Días</span>
+                                <span class="stat-label">Análisis por Día de la Semana</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">24h</span>
+                                <span class="stat-label">Predicción Horaria</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-number">Real vs ML</span>
+                                <span class="stat-label">Comparativa de Infracciones</span>
+                            </div>
+                        </div>
+
+                        <!-- Contenedor de análisis ML -->
+                        <div class="analysis-container">
+                            <div class="analysis-card" style="grid-column: 1 / -1;">
+                                <div class="card-header">
+                                    <i class="fas fa-chart-line card-icon"></i>
+                                    <h3 class="card-title">Predicción Semanal por Día y Hora (Lunes a Domingo)</h3>
+                                </div>
+                                <div class="chart-container" style="background: rgba(0,0,0,0.3); padding: 2rem;">
+                                    {% if image_regresion %}
+                                    <img src="data:image/png;base64,{{ image_regresion }}"
+                                        alt="Regresión {{ selected }}"
+                                        style="max-height: 900px; width: auto; margin: 0 auto; display: block;">
+                                    {% else %}
+                                    <p>No se pudo generar el gráfico de regresión</p>
                                     {% endif %}
                                 </div>
                             </div>
@@ -200,4 +306,5 @@
         });
     </script>
 </body>
+
 </html>
