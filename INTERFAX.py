@@ -36,7 +36,7 @@ def index():
                 TEMPLATE,
                 provincias=PROVINCIAS,
                 image=None,
-                image_regresion=None,
+                imagenes_semana={},
                 image_regresion_general=None,
                 selected=None,
                 tabla=None,
@@ -59,16 +59,18 @@ def index():
                 img_dbscan_b64 = None
                 print(f"Error DBSCAN {prov}: {e}")
 
-            # 2) Generar gráfico via módulo Regresión Semanal
+            # 2) Generar gráfico via módulo Regresión Semanal (7 imágenes)
             try:
                 module_reg = importlib.import_module(f"Regresion.{prov}_SEMANA")
-                fig_reg = module_reg.main()
-                buf2 = io.BytesIO()
-                fig_reg.savefig(buf2, format='png', bbox_inches='tight', dpi=150)
-                buf2.seek(0)
-                img_reg_b64 = base64.b64encode(buf2.read()).decode('ascii')
+                figs_semana = module_reg.main()
+                imagenes_semana = {}
+                for dia, fig_dia in figs_semana.items():
+                    buf2 = io.BytesIO()
+                    fig_dia.savefig(buf2, format='png', bbox_inches='tight', dpi=150)
+                    buf2.seek(0)
+                    imagenes_semana[dia] = base64.b64encode(buf2.read()).decode('ascii')
             except Exception as e:
-                img_reg_b64 = None
+                imagenes_semana = {}
                 print(f"Error Regresion Semana {prov}: {e}")
 
             # 3) Generar gráfico via módulo Regresión General (24h)
@@ -95,7 +97,7 @@ def index():
                 TEMPLATE,
                 provincias=PROVINCIAS,
                 image=img_dbscan_b64,
-                image_regresion=img_reg_b64,
+                imagenes_semana=imagenes_semana,
                 image_regresion_general=img_reg_gen_b64,
                 selected=prov,
                 tabla=tabla_html,
@@ -107,7 +109,7 @@ def index():
         TEMPLATE,
         provincias=PROVINCIAS,
         image=None,
-        image_regresion=None,
+        imagenes_semana={},
         image_regresion_general=None,
         selected=None,
         tabla=None,

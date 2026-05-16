@@ -229,23 +229,23 @@
                             </div>
                         </div>
 
-                        <!-- Contenedor de análisis ML -->
-                        <div class="analysis-container">
-                            <div class="analysis-card" style="grid-column: 1 / -1;">
+                        <!-- Contenedor de análisis ML Semanal (7 Gráficos en 2 Columnas) -->
+                        <div class="analysis-container" style="grid-template-columns: repeat(2, 1fr); gap: 2rem;">
+                            {% for dia, img_b64 in imagenes_semana.items() %}
+                            <div class="analysis-card" {% if loop.last %}style="grid-column: 1 / -1;"{% endif %}>
                                 <div class="card-header">
-                                    <i class="fas fa-chart-line card-icon"></i>
-                                    <h3 class="card-title">Predicción Semanal por Día y Hora (Lunes a Domingo)</h3>
+                                    <i class="fas fa-calendar-day card-icon"></i>
+                                    <h3 class="card-title">{{ dia }}</h3>
                                 </div>
-                                <div class="chart-container" style="background: rgba(0,0,0,0.3); padding: 2rem;">
-                                    {% if image_regresion %}
-                                    <img src="data:image/png;base64,{{ image_regresion }}"
-                                        alt="Regresión {{ selected }}"
-                                        style="max-height: 900px; width: auto; margin: 0 auto; display: block;">
+                                <div class="chart-container" style="background: rgba(0,0,0,0.3); padding: 1.5rem;">
+                                    {% if img_b64 %}
+                                    <img src="data:image/png;base64,{{ img_b64 }}" alt="{{ dia }} {{ selected }}" style="width: 100%; height: auto; max-height: 500px; object-fit: contain; display: block; margin: 0 auto;">
                                     {% else %}
-                                    <p>No se pudo generar el gráfico de regresión</p>
+                                    <p>No se pudo generar el gráfico para {{ dia }}</p>
                                     {% endif %}
                                 </div>
                             </div>
+                            {% endfor %}
                         </div>
                     </section>
                     {% else %}
