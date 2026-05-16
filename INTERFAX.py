@@ -1,16 +1,19 @@
 import base64
 import importlib
 import io
+import os
 import sys
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
 from flask import Flask, render_template, request
 
 # Añadir ruta de los módulos de análisis
-BASE_DIR = r"/"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 if BASE_DIR not in sys.path:
     sys.path.append(BASE_DIR)
 
-EXCEL_PATH = r"C:\db\Nik Denilson\Universidad\IntiligenciaArtificial\Proyecto\Scrip\Martin\PROVINCIAS.xlsx"
+EXCEL_PATH = os.path.join(BASE_DIR, "PROVINCIAS.xlsx")
 
 app = Flask(__name__, template_folder='static')
 
@@ -33,6 +36,8 @@ def index():
                 TEMPLATE,
                 provincias=PROVINCIAS,
                 image=None,
+                image_regresion=None,
+                image_regresion_general=None,
                 selected=None,
                 tabla=None,
                 powerbi=True
@@ -44,20 +49,41 @@ def index():
         if prov and prov in PROVINCIAS:
             # 1) Generar gráfico via módulo DBSCAN
             try:
-                module = importlib.import_module(f"SanMartin.{prov}")
-                fig = module.main()
-            except ImportError:
-                return f"No se encontró el módulo para {prov}", 500
+                module_dbscan = importlib.import_module(f"SanMartin.{prov}")
+                fig_dbscan = module_dbscan.main()
+                buf = io.BytesIO()
+                fig_dbscan.savefig(buf, format='png', bbox_inches='tight', dpi=150)
+                buf.seek(0)
+                img_dbscan_b64 = base64.b64encode(buf.read()).decode('ascii')
             except Exception as e:
-                return f"Error al ejecutar el módulo {prov}: {e}", 500
+                img_dbscan_b64 = None
+                print(f"Error DBSCAN {prov}: {e}")
 
-            # Convertir figura a base64
-            buf = io.BytesIO()
-            fig.savefig(buf, format='png', bbox_inches='tight', dpi=150)
-            buf.seek(0)
-            img_b64 = base64.b64encode(buf.read()).decode('ascii')
+            # 2) Generar gráfico via módulo Regresión Semanal
+            try:
+                module_reg = importlib.import_module(f"Regresion.{prov}_SEMANA")
+                fig_reg = module_reg.main()
+                buf2 = io.BytesIO()
+                fig_reg.savefig(buf2, format='png', bbox_inches='tight', dpi=150)
+                buf2.seek(0)
+                img_reg_b64 = base64.b64encode(buf2.read()).decode('ascii')
+            except Exception as e:
+                img_reg_b64 = None
+                print(f"Error Regresion Semana {prov}: {e}")
 
-            # 2) Leer la hoja correspondiente desde el Excel
+            # 3) Generar gráfico via módulo Regresión General (24h)
+            try:
+                module_reg_gen = importlib.import_module(f"Regresion.{prov}")
+                fig_reg_gen = module_reg_gen.main()
+                buf3 = io.BytesIO()
+                fig_reg_gen.savefig(buf3, format='png', bbox_inches='tight', dpi=150)
+                buf3.seek(0)
+                img_reg_gen_b64 = base64.b64encode(buf3.read()).decode('ascii')
+            except Exception as e:
+                img_reg_gen_b64 = None
+                print(f"Error Regresion General {prov}: {e}")
+
+            # 4) Leer la hoja correspondiente desde el Excel
             try:
                 hoja = prov.replace('_', ' ')
                 df = pd.read_excel(EXCEL_PATH, sheet_name=hoja)
@@ -68,7 +94,9 @@ def index():
             return render_template(
                 TEMPLATE,
                 provincias=PROVINCIAS,
-                image=img_b64,
+                image=img_dbscan_b64,
+                image_regresion=img_reg_b64,
+                image_regresion_general=img_reg_gen_b64,
                 selected=prov,
                 tabla=tabla_html,
                 powerbi=False
@@ -79,6 +107,8 @@ def index():
         TEMPLATE,
         provincias=PROVINCIAS,
         image=None,
+        image_regresion=None,
+        image_regresion_general=None,
         selected=None,
         tabla=None,
         powerbi=False
