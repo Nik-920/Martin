@@ -8,7 +8,7 @@
 
 DATASET : https://www.datosabiertos.gob.pe/dataset/registro-de-infracciones-tr%C3%A1nsito-de-la-regi%C3%B3n-san-mart%C3%ADn-%E2%80%93-gore-san-mart%C3%ADn-%E2%80%93-grsm/resource#{view-graph:{graphOptions:{hooks:{processOffset:{},bindEvents:{}}}},graphOptions:{hooks:{processOffset:{},bindEvents:{}}}}
 
-Este proyecto es un ecosistema integral de Inteligencia Artificial y Ciencia de Datos diseñado para analizar, agrupar y predecir patrones de infracciones de tránsito en las **9 provincias de la región de San Martín, Perú** (Bellavista, Huallaga, Lamas, Mariscal Cáceres, Moyobamba, Picota, Rioja, San Martín y Tocache).
+Este proyecto es un ecosistema integral de Mineria de Datos diseñado para analizar, agrupar y predecir patrones de infracciones de tránsito en las **9 provincias de la región de San Martín, Perú** (Bellavista, Huallaga, Lamas, Mariscal Cáceres, Moyobamba, Picota, Rioja, San Martín y Tocache).
 
 El sistema integra un pipeline completo de **ETL (Extracción, Transformación y Carga)**, algoritmos de clustering no supervisado (**DBSCAN**), modelado predictivo supervisado (**Random Forest Regressor**) y un **Dashboard Web Interactivo** construido en Flask.
 
