@@ -9,19 +9,17 @@ from sklearn.preprocessing import LabelEncoder
 
 def main():
     # ==========================================
-    # 1) CARGAR DATOS
+    # 1) CARGAR DATOS LIMPIOS
     # ==========================================
-    print("1) Cargando dataset global para PICOTA...")
-    path = r"C:\db\Dataset\Infracciones.csv"
+    print("1) Cargando dataset limpio global para PICOTA...")
+    path = r"C:\db\Nik_Denilson\Universidad\IntiligenciaArtificial\Martin\Data\Infracciones_clean.csv"
 
-    try:
-        df = pd.read_csv(path, sep=";", encoding="utf-8")
-    except:
-        df = pd.read_csv(path, sep=";", encoding="latin1")
+    df = pd.read_csv(path, sep=";", encoding="utf-8")
 
     # ==========================================
     # 2) PROCESAR
     # ==========================================
+    # La hora en el dataset limpio viene en formato estricto HH:MM:SS
     df['HORA_INFRACCION'] = pd.to_datetime(
         df['HORA_INFRACCION'], format='%H:%M:%S', errors='coerce'
     )
@@ -57,13 +55,13 @@ def main():
     model.fit(X, y)
 
     # ==========================================
-    # ✅ 8) PREDICCIÓN Y GRÁFICO PARA PICOTA
+    # 8) PREDICCIÓN Y GRÁFICO PARA PICOTA
     # ==========================================
     prov = 'PICOTA'
-    print(f"\n🔹 Generando predicción y gráfico para {prov}...")
+    print(f"\n[*] Generando prediccion y grafico para {prov}...")
 
     if prov not in le.classes_:
-        print(f"❌ Error: La provincia {prov} no se encuentra en el dataset.")
+        print(f"[ERROR] La provincia {prov} no se encuentra en el dataset.")
         return
 
     cod = le.transform([prov])[0]
@@ -99,7 +97,7 @@ def main():
 
     filename = f"mejorado_{prov}.png"
     plt.savefig(filename, dpi=300)
-    print(f"✅ Gráfico guardado: {filename}")
+    print(f"[OK] Grafico guardado: {filename}")
     return fig
 
 

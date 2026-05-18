@@ -3,19 +3,20 @@ import pandas as pd
 from matplotlib.figure import Figure
 from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import StandardScaler
+
 def main():
-    # 1) Cargar datos
-    path = r"C:\db\Dataset\Infracciones.csv"
-    df = pd.read_csv(path, sep=";", encoding="latin1")
+    # 1) Cargar datos limpios (Infracciones_clean.csv con codificacion utf-8)
+    path = r"C:\db\Nik_Denilson\Universidad\IntiligenciaArtificial\Martin\Data\Infracciones_clean.csv"
+    df = pd.read_csv(path, sep=";", encoding="utf-8")
 
-    # 2) Filtrar por provincia Bellavista
-    df = df[df['PROVINCIA'].str.upper().fillna('') == 'BELLAVISTA']
+    # 2) Filtrar por provincia Bellavista (ya estandarizada en mayusculas en el dataset limpio)
+    df = df[df['PROVINCIA'] == 'BELLAVISTA']
 
-    # 3) Preprocesar fecha y extraer día
-    df['FECHA'] = pd.to_datetime(df['FECHA'], format='%Y%m%d', errors='coerce')
+    # 3) Preprocesar fecha (nuevo formato YYYY/MM/DD) y extraer dia
+    df['FECHA'] = pd.to_datetime(df['FECHA'], format='%Y/%m/%d', errors='coerce')
     df['DIA'] = df['FECHA'].dt.day
 
-    # 4) Preprocesar hora y calcular segundos
+    # 4) Preprocesar hora (formato HH:MM:SS) y calcular segundos
     df['HORA_INFRACCION'] = pd.to_datetime(
         df['HORA_INFRACCION'], format='%H:%M:%S', errors='coerce'
     )

@@ -4,20 +4,19 @@ from matplotlib.figure import Figure
 from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import StandardScaler
 
-
 def main():
-    # 1) Cargar datos
-    path = r"C:\db\Dataset\Infracciones.csv"
-    df = pd.read_csv(path, sep=";", encoding="latin1")
+    # 1) Cargar datos limpios (Infracciones_clean.csv con codificacion utf-8)
+    path = r"C:\db\Nik_Denilson\Universidad\IntiligenciaArtificial\Martin\Data\Infracciones_clean.csv"
+    df = pd.read_csv(path, sep=";", encoding="utf-8")
 
-    # 2) Filtrar por provincia LAMAS
-    df = df[df['PROVINCIA'].str.upper().fillna('') == 'LAMAS']
+    # 2) Filtrar por provincia Lamas (ya estandarizada en mayusculas en el dataset limpio)
+    df = df[df['PROVINCIA'] == 'LAMAS']
 
-    # 3) Convertir FECHA y extraer día
-    df['FECHA'] = pd.to_datetime(df['FECHA'], format='%Y%m%d', errors='coerce')
+    # 3) Preprocesar fecha (nuevo formato YYYY/MM/DD) y extraer dia
+    df['FECHA'] = pd.to_datetime(df['FECHA'], format='%Y/%m/%d', errors='coerce')
     df['DIA'] = df['FECHA'].dt.day
 
-    # 4) Convertir HORA_INFRACCION y calcular segundos
+    # 4) Preprocesar hora (formato HH:MM:SS) y calcular segundos
     df['HORA_INFRACCION'] = pd.to_datetime(
         df['HORA_INFRACCION'], format='%H:%M:%S', errors='coerce'
     )
@@ -27,34 +26,28 @@ def main():
             df['HORA_INFRACCION'].dt.second
     )
 
-    # 5) Eliminar valores nulos
+    # 5) Eliminar nulos
     df = df.dropna(subset=['DIA', 'SEGUNDOS'])
 
-    # 6) Preparar matriz y normalizar
+    # 6) Preparar matriz para DBSCAN
     X = df[['SEGUNDOS', 'DIA']].values
     X_scaled = StandardScaler().fit_transform(X)
 
-    # 7) Aplicar DBSCAN
+    # 7) Ejecutar DBSCAN
     dbscan = DBSCAN(eps=0.21, min_samples=10)
     df['CLUSTER'] = dbscan.fit_predict(X_scaled)
 
     # 8) Preparar figura
-    fig = Figure(figsize=(12, 6))
+    fig = Figure(figsize=(10, 6))
     ax = fig.subplots()
 
-    # Convertir segundos a horas decimales
-    df['HORAS_DECIMALES'] = df['SEGUNDOS'] / 3600
-    scatter = ax.scatter(
-        df['HORAS_DECIMALES'],
-        df['DIA'],
-        c=df['CLUSTER'],
-        cmap='tab10',
-        alpha=0.6
-    )
+    # Convertir segundos a horas decimales para graficar
+    horas = df['SEGUNDOS'] / 3600
+    scatter = ax.scatter(horas, df['DIA'], c=df['CLUSTER'], cmap='tab10', alpha=0.6)
 
     # Etiquetas y estilo
-    ax.set_xlabel('Hora del día (0 - 23)')
-    ax.set_ylabel('Día del mes (1 - 31)')
+    ax.set_xlabel('Hora del día (0 – 23)')
+    ax.set_ylabel('Día del mes (1 – 31)')
     ax.set_title('Agrupamiento DBSCAN de Infracciones por SEGUNDOS (Lamas)')
     ax.set_xticks(range(0, 24))
     ax.grid(True)

@@ -62,7 +62,8 @@ body {
     overflow-y: auto;
     z-index: 50;
     box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
-    padding-top: 140px; /* Espacio para el header */
+    padding-top: 140px;
+    /* Espacio para el header */
 }
 
 .sidebar::-webkit-scrollbar {
@@ -83,7 +84,8 @@ body {
     margin-left: var(--sidebar-width);
     flex: 1;
     min-height: 100vh;
-    padding-top: 140px; /* Espacio para el header fijo */
+    padding-top: 140px;
+    /* Espacio para el header fijo */
 }
 
 .container {
@@ -258,14 +260,15 @@ header {
     background: rgba(15, 23, 42, 0.95);
     border-bottom: 1px solid var(--border-tech);
     backdrop-filter: blur(10px);
-    padding: 2rem 1rem;
+    padding: 1rem 1rem;
     text-align: center;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     width: 100%;
-    z-index: 200; /* Mayor que sidebar para que quede encima */
+    z-index: 200;
+    /* Mayor que sidebar para que quede encima */
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
 }
 
@@ -336,8 +339,8 @@ main {
 }
 
 .stat-card {
-    background: linear-gradient(145deg, rgba(30,41,59,0.9), rgba(15,23,42,0.9));
-    border: 1px solid rgba(255,255,255,0.05);
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-left: 3px solid var(--accent-secondary);
     padding: 1.5rem;
     border-radius: 6px;
@@ -418,7 +421,7 @@ main {
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     padding: 1.5rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     position: relative;
     overflow: hidden;
 }
@@ -435,8 +438,13 @@ main {
 }
 
 @keyframes scan {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
 }
 
 .card-header {
@@ -465,7 +473,7 @@ main {
     background: rgba(0, 0, 0, 0.2);
     border-radius: 8px;
     padding: 1rem;
-    border: 1px dashed rgba(255,255,255,0.1);
+    border: 1px dashed rgba(255, 255, 255, 0.1);
 }
 
 .chart-container img {
@@ -562,8 +570,13 @@ main {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* FOOTER */

@@ -11,19 +11,18 @@ from matplotlib.ticker import MaxNLocator
 
 def main():
     provincia = "LAMAS"
-    print(f"1) Cargando dataset para análisis semanal de {provincia}...")
-    path = r"C:\db\Dataset\Infracciones.csv"
+    print(f"1) Cargando dataset limpio para analisis semanal de {provincia}...")
+    path = r"C:\db\Nik_Denilson\Universidad\IntiligenciaArtificial\Martin\Data\Infracciones_clean.csv"
 
-    try:
-        df = pd.read_csv(path, sep=";", encoding="utf-8")
-    except:
-        df = pd.read_csv(path, sep=";", encoding="latin1")
+    df = pd.read_csv(path, sep=";", encoding="utf-8")
 
     # ==========================================
     # 2) PROCESAR
     # ==========================================
-    df['FECHA'] = pd.to_datetime(df['FECHA'], format='%Y%m%d', errors='coerce')
+    # La fecha en el dataset limpio viene en formato YYYY/MM/DD
+    df['FECHA'] = pd.to_datetime(df['FECHA'], format='%Y/%m/%d', errors='coerce')
 
+    # La hora en el dataset limpio viene en formato estricto HH:MM:SS
     df['HORA_INFRACCION'] = pd.to_datetime(
         df['HORA_INFRACCION'], format='%H:%M:%S', errors='coerce'
     )
@@ -59,14 +58,14 @@ def main():
     model = RandomForestRegressor(n_estimators=150, random_state=42)
     model.fit(X, y)
 
-    print("✅ Modelo entrenado")
+    print("[OK] Modelo entrenado")
 
     # ==========================================
-    # ✅ 5) GRAFICO POR DÍA (7 IMÁGENES INDEPENDIENTES)
+    # 5) GRAFICO POR DÍA (7 IMÁGENES INDEPENDIENTES)
     # ==========================================
-    print(f"\n🔹 Generando predicción y gráfico por día de la semana para {provincia}...")
+    print(f"\n[*] Generando prediccion y grafico por dia de la semana para {provincia}...")
     if provincia not in le.classes_:
-        print(f"❌ Error: La provincia {provincia} no se encuentra en el dataset.")
+        print(f"[ERROR] La provincia {provincia} no se encuentra en el dataset.")
         return {}
 
     cod = le.transform([provincia])[0]
@@ -112,7 +111,7 @@ def main():
 
         filename = f"semana_{provincia.replace(' ', '_')}_{nombre_dia}.png"
         plt.savefig(filename, dpi=300)
-        print(f"✅ Gráfico guardado: {filename}")
+        print(f"[OK] Grafico guardado: {filename}")
 
         figs[nombre_dia] = fig
 

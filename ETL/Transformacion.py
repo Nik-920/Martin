@@ -1,70 +1,61 @@
-# EDA_Infracciones/eda_infracciones_validado.py
+# ETL/Transformacion.py
 
 import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
-
 
 def main():
-
     # ==========================================
-    # 1) CARGAR DATOS (🔧 FIX ENCODING)
+    # 1) CARGAR DATOS
     # ==========================================
-    print("1) Cargando dataset...")
-    path = r"C:\db\Dataset\Infracciones.csv"
+    print("1) Cargando dataset original...")
+    path = r"C:\db\Nik_Denilson\Universidad\IntiligenciaArtificial\Martin\Data\Infracciones.csv"
 
-    # 👉 Prueba UTF-8 primero (mejor)
     try:
         df = pd.read_csv(path, sep=";", encoding="utf-8")
-    except:
+    except Exception:
         df = pd.read_csv(path, sep=";", encoding="latin1")
 
-    print("\n📌 Dimensiones:", df.shape)
+    print(f"\n[*] Dimensiones originales: {df.shape}")
+
+    # Guardar copias originales para mostrar el antes y el despues
+    df['FECHA_ORIGINAL'] = df['FECHA'].astype(str)
+    df['HORA_ORIGINAL'] = df['HORA_INFRACCION'].astype(str)
 
     # ==========================================
-    # 2) VALIDACIÓN DE FECHA
+    # 2) TRANSFORMACION DE FECHA (YYYY/MM/DD)
     # ==========================================
-    print("\n2) Validando FECHA...")
+    print("\n2) Transformando columna FECHA al formato estandar (YYYY/MM/DD)...")
+    df['FECHA_DT'] = pd.to_datetime(df['FECHA'], format='%Y%m%d', errors='coerce')
+    df['FECHA'] = df['FECHA_DT'].dt.strftime('%Y/%m/%d')
 
-    df['FECHA_ORIGINAL'] = df['FECHA']
-
-    df['FECHA'] = pd.to_datetime(
-        df['FECHA'], format='%Y%m%d', errors='coerce'
-    )
-
-    fechas_invalidas = df['FECHA'].isnull().sum()
-    print(f"❌ Fechas inválidas: {fechas_invalidas}")
-
-    if fechas_invalidas > 0:
-        print(df[df['FECHA'].isnull()][['FECHA_ORIGINAL']].head())
-
-    df['DIA'] = df['FECHA'].dt.day
-    df['MES'] = df['FECHA'].dt.month
-    df['AÑO'] = df['FECHA'].dt.year
+    # Extraer componentes si se requieren para analisis
+    df['DIA'] = df['FECHA_DT'].dt.day
+    df['MES'] = df['FECHA_DT'].dt.month
+    df['AÑO'] = df['FECHA_DT'].dt.year
 
     # ==========================================
-    # 3) VALIDACIÓN DE HORA
+    # 3) TRANSFORMACION DE HORA (HH:MM:SS)
     # ==========================================
-    print("\n3) Validando HORA...")
+    print("\n3) Transformando columna HORA_INFRACCION al formato estricto (HH:MM:SS)...")
+    # Convertir a datetime para estandarizar y luego formatear con 2 digitos en la hora (%H:%M:%S)
+    df['HORA_DT'] = pd.to_datetime(df['HORA_INFRACCION'], format='%H:%M:%S', errors='coerce')
+    df['HORA_INFRACCION'] = df['HORA_DT'].dt.strftime('%H:%M:%S')
 
-    df['HORA_ORIGINAL'] = df['HORA_INFRACCION']
+    df['HORA'] = df['HORA_DT'].dt.hour
 
-    df['HORA_INFRACCION'] = pd.to_datetime(
-        df['HORA_INFRACCION'],
-        format='%H:%M:%S',
-        errors='coerce'
-    )
-
-    horas_invalidas = df['HORA_INFRACCION'].isnull().sum()
-    print(f"❌ Horas inválidas: {horas_invalidas}")
-
-    df['HORA'] = df['HORA_INFRACCION'].dt.hour
+    # Eliminar columnas temporales de datetime
+    df = df.drop(columns=['FECHA_DT', 'HORA_DT'])
 
     # ==========================================
-    # 4) VALIDACIÓN DE COORDENADAS
+    # 4) TRANSFORMACION DE PROVINCIA
     # ==========================================
-    print("\n4) Validando COORDENADAS...")
+    print("\n4) Estandarizando columna PROVINCIA (mayusculas y sin espacios en los extremos)...")
+    df['PROV_ORIGINAL'] = df['PROVINCIA'].astype(str)
+    df['PROVINCIA'] = df['PROVINCIA'].astype(str).str.strip().str.upper()
 
+    # ==========================================
+    # 5) VALIDACION Y LIMPIEZA DE COORDENADAS
+    # ==========================================
+    print("\n5) Limpiando y validando COORDENADAS (LATITUD / LONGITUD)...")
     df['LAT_ORIGINAL'] = df['LATITUD']
     df['LON_ORIGINAL'] = df['LONGITUD']
 
@@ -74,90 +65,36 @@ def main():
     df['LATITUD'] = pd.to_numeric(df['LATITUD'], errors='coerce')
     df['LONGITUD'] = pd.to_numeric(df['LONGITUD'], errors='coerce')
 
-    print("❌ Lat inválidas:", df['LATITUD'].isnull().sum())
-    print("❌ Lon inválidas:", df['LONGITUD'].isnull().sum())
+    # ==========================================
+    # 6) LIMPIEZA DE TEXTO EN INFRACCIONES
+    # ==========================================
+    print("\n6) Limpiando texto de la descripcion de infracciones...")
+    df['D_INFRACCION'] = df['D_INFRACCION'].astype(str).str.strip().str.upper()
+    df['D_INFRACCION'] = df['D_INFRACCION'].str.replace('Ã', 'A', regex=False).str.replace('É', 'E', regex=False)
 
     # ==========================================
-    # 🔥 5) LIMPIEZA DE TEXTO (LO MÁS IMPORTANTE)
+    # 7) MUESTRA DEL ANTES Y DESPUES
     # ==========================================
-    print("\n5) Limpiando texto de infracciones...")
-
-    # Quitar espacios extras
-    df['D_INFRACCION'] = df['D_INFRACCION'].astype(str).str.strip()
-
-    # Pasar a mayúscula
-    df['D_INFRACCION'] = df['D_INFRACCION'].str.upper()
-
-    # Reemplazar caracteres raros
-    df['D_INFRACCION'] = df['D_INFRACCION'] \
-        .str.replace('Ã', 'A', regex=False) \
-        .str.replace('É', 'E', regex=False)
+    print("\n" + "="*60)
+    print(" COMPARATIVA DE TRANSFORMACION: ANTES VS DESPUES")
+    print("="*60)
+    comparativa = df[['FECHA_ORIGINAL', 'FECHA', 'HORA_ORIGINAL', 'HORA_INFRACCION', 'PROV_ORIGINAL', 'PROVINCIA']].head(10)
+    print(comparativa.to_string(index=False))
+    print("="*60)
 
     # ==========================================
-    # 🔥 6) CATEGORIZACIÓN INTELIGENTE
+    # 8) GUARDAR ARCHIVO LIMPIO
     # ==========================================
-    df['TIPO_LIMPIO'] = df['D_INFRACCION'].apply(
-        lambda x:
-        'LUCES' if 'LUZ' in x or 'LUCES' in x else
-        'EXTINTOR' if 'EXTINTOR' in x else
-        'BOTIQUIN' if 'BOTIQUIN' in x else
-        'LICENCIA' if 'LICENCIA' in x else
-        'AUTORIZACION' if 'AUTORIZ' in x else
-        'PRONTO PAGO' if 'PRONTO PAGO' in x else
-        'OTROS'
-    )
+    out_path = r"C:\db\Nik_Denilson\Universidad\IntiligenciaArtificial\Martin\Data\Infracciones_clean.csv"
+    print(f"\n8) Guardando dataset limpio en:\n   {out_path} ...")
+    
+    # Eliminar columnas de respaldo antes de exportar
+    df_clean = df.drop(columns=['FECHA_ORIGINAL', 'HORA_ORIGINAL', 'PROV_ORIGINAL', 'LAT_ORIGINAL', 'LON_ORIGINAL'])
+    df_clean.to_csv(out_path, sep=";", index=False, encoding="utf-8-sig")
+    print("[OK] Archivo guardado exitosamente.")
 
-    print("\n📌 Distribución limpia:")
-    print(df['TIPO_LIMPIO'].value_counts())
+    print("\n[OK] Transformacion completa y exitosa.")
+    return df_clean
 
-    # ==========================================
-    # 7) TOP ORIGINAL VS LIMPIO
-    # ==========================================
-    print("\n📌 Top original:")
-    print(df['D_INFRACCION'].value_counts().head(10))
-
-    print("\n📌 Top limpio:")
-    print(df['TIPO_LIMPIO'].value_counts())
-
-    # ==========================================
-    # 8) GRÁFICOS
-    # ==========================================
-    fig = Figure(figsize=(14, 10))
-    axs = fig.subplots(2, 2)
-
-    # TOP limpio (MEJOR)
-    limpio_counts = df['TIPO_LIMPIO'].value_counts()
-    axs[0, 0].bar(limpio_counts.index, limpio_counts.values)
-    axs[0, 0].set_title('Tipos de Infracción (LIMPIO)')
-    axs[0, 0].tick_params(axis='x', rotation=45)
-
-    # Hora
-    axs[0, 1].hist(df['HORA'].dropna(), bins=24, edgecolor='black')
-    axs[0, 1].set_title('Distribución por Hora')
-
-    # Mes
-    mes_counts = df['MES'].value_counts().sort_index()
-    axs[1, 0].bar(mes_counts.index.astype(str), mes_counts.values)
-    axs[1, 0].set_title('Distribución por Mes')
-
-    # Mapa
-    axs[1, 1].scatter(df['LONGITUD'], df['LATITUD'], s=10, alpha=0.3)
-    axs[1, 1].set_title("Mapa de Infracciones")
-
-    print("\n✅ Exploración completa + limpieza avanzada")
-
-    return fig
-
-
-# ==========================================
-# EJECUCIÓN
-# ==========================================
 if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-
-    fig = main()
-
-    fig.savefig("eda_limpio.png", dpi=300, bbox_inches='tight')
-    print("\n✅ Gráfico guardado: eda_limpio.png")
-
-    plt.show()
+    df_limpio = main()
