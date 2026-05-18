@@ -48,6 +48,7 @@ C:\db\Nik_Denilson\Universidad\IntiligenciaArtificial\Martin\
 La selección de algoritmos en este proyecto no es arbitraria; responde directamente a la naturaleza espaciotemporal y no lineal de los datos de tráfico vehicular. A continuación se detallan los dos enfoques clave implementados:
 
 ### 1. DBSCAN (Clustering No Supervisado)
+
 **DBSCAN (Density-Based Spatial Clustering of Applications with Noise)** es un algoritmo de agrupamiento basado en la densidad espacial. En este proyecto se utiliza para analizar la relación entre la hora del día (convertida a segundos) y el día del mes.
 
 * **¿Por qué se eligió sobre K-Means?**
@@ -56,6 +57,7 @@ La selección de algoritmos en este proyecto no es arbitraria; responde directam
   * **Sin K Predefinido:** No requiere adivinar cuántos clústeres existen de antemano; el algoritmo los descubre de forma natural según la cercanía (`eps`) y cantidad mínima de incidentes (`min_samples`) de cada provincia.
 
 ### 2. Random Forest Regressor (Modelado Predictivo Supervisado)
+
 **Random Forest** es un método de ensamble (ensemble learning) que construye múltiples árboles de decisión independientes y promedia sus predicciones para estimar la cantidad de infracciones que ocurrirán en una hora y día específicos.
 
 * **¿Por qué se eligió sobre Regresión Lineal o Polinómica?**
@@ -68,24 +70,32 @@ La selección de algoritmos en este proyecto no es arbitraria; responde directam
 ## 🚀 Componentes Principales
 
 ### 1. 🧹 Pipeline ETL (`ETL/`)
+
 Garantiza la calidad e integridad de los datos antes de alimentar los modelos de Machine Learning.
+
 * **`ExploracionDatos.py`**: Realiza auditorías avanzadas utilizando expresiones regulares (Regex) para identificar inconsistencias sutiles (como horas sin ceros a la izquierda) y validar la consistencia geográfica de las 9 provincias.
 * **`Transformacion.py`**: Estandariza las fechas al formato estricto `YYYY/MM/DD`, normaliza las horas a `HH:MM:SS`, corrige separadores decimales en coordenadas de latitud/longitud, convierte textos a mayúsculas eliminando espacios redundantes y exporta el archivo `Infracciones_clean.csv` con codificación `utf-8-sig` para compatibilidad universal.
 
 ### 2. 🎯 Clustering No Supervisado (`SanMartin/`)
+
 Utiliza el algoritmo **DBSCAN (Density-Based Spatial Clustering of Applications with Noise)** para encontrar agrupaciones naturales y patrones de concentración de infracciones.
+
 * Convierte la hora exacta de la infracción en segundos acumulados del día (`0 - 86400`).
 * Relaciona la hora del día con el día del mes (`1 - 31`).
 * Cada provincia cuenta con hiperparámetros minuciosamente optimizados (`eps` y `min_samples`) para reflejar la densidad vehicular y demográfica particular de su zona.
 
 ### 3. 📈 Modelado Predictivo (`Regresion/`)
+
 Implementa modelos de **Random Forest Regressor** para predecir la cantidad de infracciones esperadas.
+
 * **Transformación Logarítmica:** Aplica `np.log1p` a la variable objetivo (conteo de infracciones) para estabilizar la varianza y manejar picos asimétricos, revirtiendo la predicción con `np.expm1`.
 * **Análisis Global (`PROVINCIA.py`):** Evalúa y grafica el comportamiento general de las infracciones a lo largo de las 24 horas del día.
 * **Análisis Semanal (`PROVINCIA_SEMANA.py`):** Desglosa las predicciones en 7 gráficos independientes (uno por cada día de la semana, de Lunes a Domingo), permitiendo identificar si los picos de infracciones ocurren en fines de semana o días laborales.
 
 ### 4. 🌐 Dashboard Web Interactivo (`INTERFAX.py`)
+
 Una aplicación web desarrollada en **Flask** que unifica todos los modelos de Inteligencia Artificial en una interfaz elegante y fácil de usar.
+
 * **Selección Dinámica:** El usuario elige una provincia desde un menú desplegable.
 * **Ejecución en Tiempo Real:** Al seleccionar una provincia, el servidor ejecuta en segundo plano los modelos de DBSCAN y Random Forest correspondientes.
 * **Visualización Integrada:** Muestra de forma simultánea el gráfico de clústeres (DBSCAN), la curva de regresión global, las 7 curvas de predicción diaria y una tabla de datos limpios, además de enlazar con paneles de analítica BI.
@@ -95,22 +105,27 @@ Una aplicación web desarrollada en **Flask** que unifica todos los modelos de I
 ## 🛠️ Instalación y Configuración
 
 ### 1. Prerrequisitos
+
 Asegúrate de tener instalado **Python 3.12 o superior** en tu sistema operativo Windows.
 
 ### 2. Clonar el repositorio
+
 ```bash
 git clone <url-del-repositorio>
 cd Martin
 ```
 
 ### 3. Crear y activar un entorno virtual (Recomendado)
+
 ```bash
 python -m venv venv
 .\venv\Scripts\activate
 ```
 
 ### 4. Instalar dependencias
+
 Asegúrate de instalar las librerías requeridas para el análisis de datos y la web app:
+
 ```bash
 pip install pandas numpy scikit-learn matplotlib flask
 ```
@@ -120,29 +135,37 @@ pip install pandas numpy scikit-learn matplotlib flask
 ## 🖥️ Guía de Uso y Ejecución
 
 ### Opción A: Ejecutar el Dashboard Web (Recomendado)
+
 Para interactuar con todo el sistema de forma visual a través del navegador:
+
 ```bash
 python INTERFAX.py
 ```
+
 1. Abre tu navegador web e ingresa a: `http://127.0.0.1:5000/`.
 2. Selecciona una provincia en el menú desplegable y haz clic en **"Generar Análisis"**.
 3. Explora los gráficos interactivos generados en tiempo real por la Inteligencia Artificial.
 
 ### Opción B: Ejecutar Módulos Individuales por Consola
+
 Si deseas probar o auditar partes específicas del pipeline desde la terminal:
 
 * **Ejecutar la Limpieza y ETL:**
+
   ```bash
   python ETL/Transformacion.py
   ```
+
   *(Generará el archivo `Data/Infracciones_clean.csv` y mostrará una comparativa en consola).*
 
 * **Ejecutar Clustering (DBSCAN) de una provincia:**
+
   ```bash
   python -c "from SanMartin.BELLAVISTA import main; main()"
   ```
 
 * **Ejecutar Regresión Semanal de una provincia:**
+
   ```bash
   python Regresion/BELLAVISTA_SEMANA.py
   ```
@@ -164,6 +187,3 @@ El dataset procesado contiene las siguientes columnas principales listas para el
 | **LATITUD / LONGITUD**| Coordenadas geográficas validadas | Decimal con punto (`-7.1017`) |
 
 ---
-
-## 👨‍💻 Autores y Desarrollo
-Desarrollado como proyecto avanzado de Inteligencia Artificial y Ciencia de Datos para la Universidad. Implementa las mejores prácticas en ingeniería de software, modularidad de código y pipelines de Machine Learning.
