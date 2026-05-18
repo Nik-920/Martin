@@ -1,4 +1,4 @@
-# 🚗 Sistema de Inteligencia Artificial para el Análisis y Predicción de Infracciones de Tránsito en San Martín
+# 🚗 Sistema para el Análisis y Predicción de Infracciones de Tránsito en San Martín
 
 ![Python](https://img.shields.io/badge/Python-3.12+-blue.svg?style=for-the-badge&logo=python&logoColor=white)
 ![Flask](https://img.shields.io/badge/Flask-Web%20App-black?style=for-the-badge&logo=flask&logoColor=white)
