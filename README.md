@@ -187,3 +187,26 @@ El dataset procesado contiene las siguientes columnas principales listas para el
 | **LATITUD / LONGITUD**| Coordenadas geográficas validadas | Decimal con punto (`-7.1017`) |
 
 ---
+
+## 📓 Notebook Jupyter (Flujo Completo)
+
+Se ha desarrollado un Notebook estructurado que documenta todo el ciclo de vida del análisis de datos de forma interactiva. Este flujo de trabajo incluye:
+
+1. **Carga de Datos:** Importación de los datasets originales y estructuración inicial.
+2. **Análisis Exploratorio de Datos (EDA):** Visualización de distribuciones, identificación de valores nulos o atípicos, y análisis de correlación entre variables clave (horas, días, ubicaciones).
+3. **Modelo de Machine Learning:** Entrenamiento y ajuste de hiperparámetros de los algoritmos (Random Forest y DBSCAN).
+4. **Métricas de Evaluación:** Validación de la precisión del modelo utilizando métricas estándar (como RMSE, MAE, R², y visualización real vs. predicho) para garantizar la fiabilidad y robustez de las predicciones en cada provincia.
+
+---
+
+## 🎯 Conclusiones y Toma de Decisiones
+
+### ¿Qué patrones se encontraron?
+* **Picos Temporales Específicos:** A través del análisis temporal y el algoritmo Random Forest, se detectó que existen "ventanas de tiempo" críticas donde las infracciones se disparan, y que estas varían de forma consistente según el día de la semana (por ejemplo, diferencias marcadas entre los viernes por la noche y los lunes por la mañana).
+* **Concentraciones Densas (Hotspots):** El algoritmo DBSCAN identificó agrupaciones naturales y continuas de infracciones (zonas calientes temporales), demostrando que las faltas de tránsito no son eventos aislados, sino que responden a dinámicas poblacionales repetitivas.
+* **Comportamiento por Provincia:** Cada provincia muestra una "huella digital" única en cuanto a infracciones, influenciada por su densidad poblacional y sus dinámicas de transporte local, lo que descarta una solución única para toda la región.
+
+### ¿Cómo apoya a la toma de decisiones?
+* **Optimización de Patrullajes:** Permite a las autoridades de tránsito abandonar el modelo de patrullaje aleatorio o reactivo, pasando a un modelo proactivo. Pueden desplegar personal y recursos operativos exactamente en los días, horas y provincias donde el modelo predice una alta probabilidad de infracciones.
+* **Gestión de Recursos Eficiente:** Reduce los costos operativos al evitar la sobrevigilancia en horarios de "ruido" (baja probabilidad de incidentes detectados por DBSCAN) y focalizando esfuerzos en los clústeres principales.
+* **Políticas Preventivas:** Facilita el diseño de campañas de concientización vial focalizadas, sabiendo de antemano cuándo y dónde los conductores son más propensos a cometer infracciones específicas.
