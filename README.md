@@ -5,6 +5,7 @@
 ![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-Machine%20Learning-orange?style=for-the-badge&logo=scikit-learn&logoColor=white)
 ![Pandas](https://img.shields.io/badge/Pandas-Data%20Processing-150458?style=for-the-badge&logo=pandas&logoColor=white)
 ![Matplotlib](https://img.shields.io/badge/Matplotlib-Data%20Visualization-3178C6?style=for-the-badge)
+DATASET : https://www.datosabiertos.gob.pe/dataset/registro-de-infracciones-tr%C3%A1nsito-de-la-regi%C3%B3n-san-mart%C3%ADn-%E2%80%93-gore-san-mart%C3%ADn-%E2%80%93-grsm/resource#{view-graph:{graphOptions:{hooks:{processOffset:{},bindEvents:{}}}},graphOptions:{hooks:{processOffset:{},bindEvents:{}}}}
 
 Este proyecto es un ecosistema integral de Inteligencia Artificial y Ciencia de Datos diseñado para analizar, agrupar y predecir patrones de infracciones de tránsito en las **9 provincias de la región de San Martín, Perú** (Bellavista, Huallaga, Lamas, Mariscal Cáceres, Moyobamba, Picota, Rioja, San Martín y Tocache).
 
